@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Webmapp 201</title>
+        <link rel="stylesheet" href="src/leaflet.css">
+        <link rel="stylesheet" href="src/css/bootstrap.css">
+        <link rel="stylesheet" href="src/plugins/L.Control.Zoomslider.css">
+        <link rel="stylesheet" href="src/plugins/L.Control.Sidebar.css">
+        <link rel="stylesheet" href="dist/MarkerCluster.css">
+        <link rel="stylesheet" href="dist/MarkerCluster.Default.css">
+        <link rel="stylesheet" href="https://ppete2.github.io/Leaflet.PolylineMeasure/Leaflet.PolylineMeasure.css" />
+        
+        <script src="https://ppete2.github.io/Leaflet.PolylineMeasure/Leaflet.PolylineMeasure.js"></script>
+        <script src="src/leaflet-src.js"></script>
+        <script src="src/jquery-3.6.0.min.js"></script>
+        <script src="src/turf.min.js" charset="utf-8"></script>
+        <script src="src/plugins/L.Control.Zoomslider.js"></script>
+        <script src="src/plugins/L.Control.Sidebar.js"></script>
+        <script src='swedish_counties.js'></script>
+        <script src='countries.js'></script>
+
+        
+        
+        
+       
+        
+        <style>
+            #mapdiv {
+                height: 100vh;
+            }  
+            
+            #side-bar {
+			position: absolute;
+			z-index: 1000;
+			background: rgba(255,255,255,0.7);
+			padding: 10px;
+			right: 0;
+            top: 0;
+			margin: 10px;
+			border-radius: 10px;
+			min-height: 200px;
+            }
+                        
+        </style>
+    </head>
+    <body>
+       <div id="mapdiv" class="col-md-9"></div>
+       
+       <div id="side-bar" class="col-md-3"><h2>My Map</h2>
+            <button id="l1">layer1</button>
+            <button id="l2">layer2</button>
+            <button id='btnFalun' class='btn btn-primary btn-block'>ZoomToFalun</button>
+  
+       </div>
+       
+       <div id="sidebar"><h1>leaflet-sidebar</h1>
+       </div>
+        
+       <script>
+            var mymap; 
+            var lyrOSM; 
+            var mrkCurrentLocation;
+            var ctlZoomslider;
+            var swedishlayer = L.geoJson(swedish_counties);
+            var countrieslayer
+            var ctlSlidebar;
+            var sample = L.geoJson(sample);
+            var sample1 = L.geoJson(sample1);
+            
+           
+            $(document).ready(function(){
+                mymap = L.map('mapdiv', {center:[60.48868922712431, 15.421371459960938], zoom:13});
+                lyrOSM= L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+                mymap.addLayer(lyrOSM);
+                
+                
+                ctlZoomslider = L.control.zoomslider({position:'topright'}).addTo(mymap);
+                
+                var sidebar = L.control.sidebar('sidebar', {position: 'left'});
+                mymap.addControl(sidebar);
+                
+                var latlngs = [
+					[60.482370725338484, 15.434717248972277],
+					[60.484316080102275, 15.441777259162706],
+					[60.486972387134756, 15.438435413671698]
+				];
+
+				var polyline = L.polyline(latlngs, {color: 'red'}).addTo(mymap);
+                L.control.polylineMeasure().addTo(mymap);
+               
+                               
+                                      
+                var blackIcon = L.icon({
+                    iconUrl: './map-marker.svg',
+                    iconSize:     [32, 37], // size of the icon
+                    iconAnchor:   [32, 37], // point of the icon which will correspond to marker's location
+                    popupAnchor:  [0, -30] // point from which the popup should open relative to the iconAnchor
+                });
+                
+                // Popup and marker
+                popb = L.marker([60.48868922712431, 15.431371459960938],{icon: blackIcon}).addTo(mymap).bindPopup('Intro to Leaflet');
+                
+                popf= L.marker([60.605898734439805,15.628023594617845], {icon:blackIcon}).addTo(mymap).bindPopup("<h3>Falun Museum</h3><img src= 'img/museum.jpg'width='150px'>")
+                
+                                
+                document.getElementById("l1").addEventListener("click", sweden);
+
+		          function sweden(){
+                      if(mymap.hasLayer(swedishlayer)){
+                          mymap.removeLayer(swedishlayer);
+                         
+                          sidebar.hide();
+                          
+                      } else {
+                          swedishlayer.addTo(mymap);
+                          
+                          sidebar.show();
+                      }
+			
+		          };
+                
+                countrieslayer = L.geoJson(countries, {
+			    onEachFeature: function (feature, layer) {
+				layer.bindPopup(feature.properties.name);
+			     }
+		         });
+
+
+		      document.getElementById("l2").addEventListener("click", c_layers);
+                
+                function c_layers(){
+                    if(mymap.hasLayer(countrieslayer)){
+                        mymap.removeLayer(countrieslayer);
+                    } 
+                    else {
+                        countrieslayer.addTo(mymap);
+                        }
+                    };
+                
+                
+                
+                $("#btnFalun").click(function(){
+                    mymap.setView([60.605866810126194, 15.628008842468262], 17);
+                })
+                
+                
+                
+                // Buffer
+                            
+  /*              sample1.addTo(mymap);
+                var s2 = sample1.toGeoJSON();
+                
+                var samplegeo = turf.buffer(s2, 0.5,{units: 'kilometers' });
+
+                var samplegeol = L.geoJSON(samplegeo, {style:{color:'yellow', dashArray:'5,5', fillOpacity:0.1}}).addTo(mymap);
+    */               
+                    
+  
+            });
+            
+
+            
+       </script>
+    </body>
+</html>
