@@ -1,77 +1,252 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>GIS Web Application</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    
-    <!-- MarkerCluster CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
-    
-    <!-- Polyline Measure CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-polylinemeasure@1.2.0/Leaflet.PolylineMeasure.css" />
-    
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
-    
+    <meta charset="UTF-8">
+    <title>GIS Web App</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-sidebar-v2@3.2.3/css/leaflet-sidebar.min.css" />
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-        }
-        #map {
-            width: 75%;
-            height: 100vh;
-            float: left;
-        }
-        #sidebar {
-            width: 25%;
-            height: 100vh;
-            float: right;
-            overflow-y: auto;
-            padding: 10px;
-            box-sizing: border-box;
-        }
-        .info-container {
-            margin-bottom: 20px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
+        #map { height: 600px; }
+        .sidebar { width: 300px; }
+        .control-buttons { position: absolute; top: 10px; left: 50px; z-index: 1000; }
+        .control-buttons button { margin: 5px; }
     </style>
 </head>
 <body>
-    <div id="sidebar">
-        <h2>GIS Web Application</h2>
-        <div id="controls">
-            <button onclick="showTask1()">Task 1: Draw Features</button>
-            <button onclick="showTask2()">Task 2: POIs</button>
-            <button onclick="showTask3()">Task 3: Supermarkets</button>
-            <button onclick="showTask4()">Task 4: Image Overlay</button>
-            <button onclick="showTask5()">Task 5: Fuel Stations</button>
-            <button onclick="showTask6()">Task 6: Weather</button>
-            <button onclick="showTask7()">Task 7: School Clusters</button>
-        </div>
-        <div id="info">
-            <!-- This will be filled dynamically -->
-        </div>
+    <div class="control-buttons">
+        <button onclick="startDraw('marker')">Draw Point</button>
+        <button onclick="startDraw('polyline')">Draw Line</button>
+        <button onclick="startDraw('polygon')">Draw Polygon</button>
+        <button onclick="toggleSidebar()">Toggle Sidebar</button>
+        <button onclick="toggleMeasure()">Toggle Measure</button>
+        <button onclick="toggleBuffers()">Toggle Buffers</button>
+        <button onclick="toggleImageOverlay()">Toggle Image</button>
+        <button onclick="toggleFuelClusters()">Toggle Fuel Clusters</button>
+        <button onclick="refreshWeather()">Refresh Weather</button>
+        <button onclick="toggleClusters()">Toggle School Clusters</button>
     </div>
+    <div id="sidebar" class="sidebar"></div>
     <div id="map"></div>
 
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-    
-    <!-- MarkerCluster JS -->
-    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
-    
-    <!-- Polyline Measure JS -->
-    <script src="https://cdn.jsdelivr.net/npm/leaflet-polylinemeasure@1.2.0/Leaflet.PolylineMeasure.js"></script>
-    
-    <!-- Your JS -->
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <script src="https://unpkg.com/leaflet-sidebar-v2@3.2.3/js/leaflet-sidebar.min.js"></script>
+    <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
+    <script src="https://unpkg.com/simple-statistics@7.7.0/dist/simple-statistics.min.js"></script>
+    <script src="https://unpkg.com/leaflet-ajax@2.1.0/dist/leaflet.ajax.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/polyline-measure@1.0.0/dist/leaflet.polyline.measure.js"></script>
+    <script>
+        // Leaflet map initialization
+        const map = L.map('map').setView([59.3293, 18.0686], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        // Sidebar
+        const sidebar = L.control.sidebar('sidebar', {
+            position: 'right'
+        }).addTo(map);
+
+        // Task 1: Draw features
+        const drawnItems = new L.FeatureGroup().addTo(map);
+        const drawControl = new L.Control.Draw({
+            draw: {
+                marker: true,
+                polyline: true,
+                polygon: true,
+                circle: false,
+                rectangle: false
+            },
+            edit: { featureGroup: drawnItems }
+        });
+        map.addControl(drawControl);
+
+        function startDraw(type) {
+            if (type === 'marker') new L.Draw.Marker(map).enable();
+            if (type === 'polyline') new L.Draw.Polyline(map).enable();
+            if (type === 'polygon') new L.Draw.Polygon(map).enable();
+        }
+
+        map.on('draw:created', function(e) {
+            const layer = e.layer;
+            drawnItems.addLayer(layer);
+            layer.bindPopup(`
+                <b>Type:</b> ${e.layerType}<br>
+                <b>Name:</b> Custom Feature<br>
+                <img src="https://via.placeholder.com/100" alt="Feature Image" width="100">
+            `).openPopup();
+        });
+
+        // Task 2: POIs with PolylineMeasure
+        const pois = [
+            { name: "Museum", lat: 59.3293, lng: 18.0686, details: "History Museum" },
+            { name: "School", lat: 59.3300, lng: 18.0700, details: "Primary School" },
+            { name: "Store", lat: 59.3280, lng: 18.0670, details: "Retail Store" },
+            { name: "Park", lat: 59.3310, lng: 18.0690, details: "City Park" },
+            { name: "Library", lat: 59.3270, lng: 18.0660, details: "Public Library" }
+        ];
+
+        const poiLayer = L.featureGroup().addTo(map);
+        pois.forEach(poi => {
+            const marker = L.marker([poi.lat, poi.lng]).addTo(poiLayer);
+            marker.on('click', () => {
+                sidebar.setContent(`
+                    <h2>${poi.name}</h2>
+                    <p><b>Location:</b> ${poi.lat}, ${poi.lng}</p>
+                    <p><b>Details:</b> ${poi.details}</p>
+                `);
+                sidebar.open();
+            });
+        });
+
+        let measureControl;
+        function toggleMeasure() {
+            if (!measureControl) {
+                measureControl = L.polylineMeasure().addTo(map);
+            } else {
+                measureControl.remove();
+                measureControl = null;
+            }
+        }
+
+        function toggleSidebar() {
+            sidebar.toggle();
+        }
+
+        // Task 3: Supermarkets with buffers
+        let bufferLayer = L.featureGroup();
+        function toggleBuffers() {
+            if (map.hasLayer(bufferLayer)) {
+                map.removeLayer(bufferLayer);
+                bufferLayer = L.featureGroup();
+            } else {
+                const supermarkets = new L.GeoJSON.AJAX('/supermarkets', {
+                    onEachFeature: (feature, layer) => {
+                        layer.bindPopup(`<b>Name:</b> ${feature.properties.name}`);
+                        const buffer = turf.buffer(feature, 1, { units: 'kilometers' });
+                        L.geoJSON(buffer, { style: { color: 'blue', fillOpacity: 0.2 } })
+                            .addTo(bufferLayer);
+                    }
+                }).addTo(map);
+
+                // Highlight non-overlapping buffers
+                supermarkets.on('data:loaded', () => {
+                    const features = supermarkets.toGeoJSON().features;
+                    features.forEach((f1, i) => {
+                        let overlaps = false;
+                        features.forEach((f2, j) => {
+                            if (i !== j && turf.intersect(turf.buffer(f1, 1, { units: 'kilometers' }), turf.buffer(f2, 1, { units: 'kilometers' }))) {
+                                overlaps = true;
+                            }
+                        });
+                        if (!overlaps) {
+                            L.geoJSON(turf.buffer(f1, 1, { units: 'kilometers' }), {
+                                style: { color: 'green', fillOpacity: 0.4 }
+                            }).addTo(bufferLayer);
+                        }
+                    });
+                });
+                bufferLayer.addTo(map);
+            }
+        }
+
+        // Task 4: Image overlay
+        let imageOverlay;
+        function toggleImageOverlay() {
+            if (!imageOverlay) {
+                imageOverlay = L.imageOverlay(
+                    'https://via.placeholder.com/200',
+                    [[55.6761 - 0.05, 12.5683 - 0.05], [55.6761 + 0.05, 12.5683 + 0.05]],
+                    { opacity: 0.7 }
+                ).addTo(map);
+            } else {
+                map.removeLayer(imageOverlay);
+                imageOverlay = null;
+            }
+        }
+
+        // Task 5: Fuel stations with clustering
+        let fuelClusters;
+        function toggleFuelClusters() {
+            if (!fuelClusters) {
+                fuelClusters = L.markerClusterGroup();
+                const fuel = new L.GeoJSON.AJAX('/fuel', {
+                    onEachFeature: (feature, layer) => {
+                        layer.bindPopup(`<b>Name:</b> ${feature.properties.name}`);
+                    },
+                    pointToLayer: (feature, latlng) => L.marker(latlng)
+                });
+                fuel.on('data:loaded', () => {
+                    fuelClusters.addLayer(fuel);
+                    map.addLayer(fuelClusters);
+                });
+            } else {
+                map.removeLayer(fuelClusters);
+                fuelClusters = null;
+            }
+        }
+
+        // Task 6: Weather API
+        const cities = [
+            { name: "Stockholm", lat: 59.3293, lng: 18.0686 },
+            { name: "Gothenburg", lat: 57.7089, lng: 11.9746 },
+            { name: "Malmö", lat: 55.6040, lng: 13.0038 },
+            { name: "Uppsala", lat: 59.8586, lng: 17.6389 },
+            { name: "Lund", lat: 55.7047, lng: 13.1910 }
+        ];
+
+        function refreshWeather() {
+            cities.forEach(city => {
+                fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${city.lat}&lon=${city.lng}&appid=6ca44591ce89b2fcdf1d698171d5b41a&units=metric`)
+                    .then(res => res.json())
+                    .then(data => {
+                        const marker = L.marker([city.lat, city.lng]).addTo(map);
+                        marker.bindPopup(`
+                            <b>${city.name}</b><br>
+                            Current: ${data.list[0].main.temp}°C, ${data.list[0].weather[0].description}<br>
+                            Forecast: ${data.list[8].main.temp}°C, ${data.list[8].weather[0].description}
+                        `);
+                        marker.on('click', () => {
+                            sidebar.setContent(`
+                                <h2>${city.name}</h2>
+                                <p><b>Current:</b> ${data.list[0].main.temp}°C, ${data.list[0].weather[0].description}</p>
+                                <p><b>Forecast:</b> ${data.list[8].main.temp}°C, ${data.list[8].weather[0].description}</p>
+                            `);
+                            sidebar.open();
+                        });
+                    });
+            });
+        }
+
+        // Task 7: School clustering
+        let schoolClusters;
+        function toggleClusters() {
+            if (!schoolClusters) {
+                schoolClusters = L.featureGroup();
+                fetch('/schools')
+                    .then(res => res.json())
+                    .then(schools => {
+                        const data = schools.map(s => [s.latitude, s.longitude]);
+                        const clusters = ss.kmeans(data, 3);
+                        clusters.clusters.forEach((cluster, i) => {
+                            cluster.forEach(idx => {
+                                const school = schools[idx];
+                                L.marker([school.latitude, school.longitude], {
+                                    icon: L.divIcon({ className: `cluster-${i}`, html: `<div style="background-color: ${['red', 'blue', 'green'][i]}; width: 10px; height: 10px; border-radius: 50%;"></div>` })
+                                }).addTo(schoolClusters);
+                            });
+                        });
+                        schoolClusters.addTo(map);
+                    });
+            } else {
+                map.removeLayer(schoolClusters);
+                schoolClusters = null;
+            }
+        }
+    </script>
 </body>
 </html>
