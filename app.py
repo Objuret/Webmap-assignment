@@ -1,9 +1,9 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify #, request
 import pandas as pd
-import numpy as np
+# import numpy as np # Not used directly in this version of app.py
 from sklearn.cluster import KMeans
 import json
-import os
+# import os # Not used
 
 app = Flask(__name__)
 
@@ -11,73 +11,58 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
-if __name__ == '__main__':
-    app.run(debug=True)
-
+# This endpoint is useful if you want the backend to serve the GeoJSON
 @app.route('/api/supermarkets')
 def get_supermarkets():
-    # Load supermarket data
-    with open('static/data/supermarket.geojson') as f:
-        supermarkets = json.load(f)
-    
-    # Return as JSON
-    return jsonify(supermarkets)
+    try:
+        with open('static/data/supermarket.geojson', 'r', encoding='utf-8') as f: # Added encoding
+            supermarkets_data = json.load(f)
+        return jsonify(supermarkets_data)
+    except FileNotFoundError:
+        return jsonify({"error": "Supermarket data file not found."}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-@app.route('/api/supermarkets/buffer')
-def supermarket_buffer_analysis():
-    # Load supermarket data
-    with open('static/data/supermarket.geojson') as f:
-        data = json.load(f)
-    
-    features = data['features']
-    buffer_results = []
-    
-    # For each supermarket, check if its buffer overlaps with others
-    for i, feature in enumerate(features):
-        coords = feature['geometry']['coordinates']
-        name = feature['properties'].get('name', f'Supermarket {i}')
-        
-        # Create a simple representation of the buffer
-        buffer_result = {
-            'id': i,
-            'name': name,
-            'coordinates': coords,
-            'overlaps': False
-        }
-        
-        # This would be where you check for overlaps
-        # For now, simplify by marking every other one as overlapping
-        buffer_result['overlaps'] = (i % 2 == 0)
-        
-        buffer_results.append(buffer_result)
-    
-    return jsonify(buffer_results)
 
 @app.route('/api/schools/clusters')
 def school_clusters():
     try:
-        # Load school data
+        # Ensure school_locations.csv is in static/data/
         df = pd.read_csv('static/data/school_locations.csv')
+
+        # Check for required columns
+        if 'xcoord' not in df.columns or 'ycoord' not in df.columns:
+            return jsonify({'error': 'CSV must contain "xcoord" and "ycoord" columns.'}), 400
         
-        # Extract coordinates for clustering
+        # Drop rows with NaN in coordinates as KMeans cannot handle them
+        df.dropna(subset=['xcoord', 'ycoord'], inplace=True)
+        if df.empty:
+            return jsonify({'error': 'No valid coordinate data found after dropping NaN values.'}), 400
+
         X = df[['xcoord', 'ycoord']].values
         
-        # Determine optimal number of clusters (simplified)
-        k = 5  # You could use methods like elbow method to determine optimal k
-        
-        # Perform K-means clustering
-        kmeans = KMeans(n_clusters=k, random_state=42)
+        # Simplified: Use a fixed k or a simple heuristic if dataset is small
+        # For larger datasets, an elbow method or silhouette score would be better.
+        k = min(5, len(df)) # Ensure k is not more than number of samples
+        if k < 1: # Handle case where df might become empty or too small
+             return jsonify({'error': 'Not enough data points for clustering.'}), 400
+
+
+        kmeans = KMeans(n_clusters=k, random_state=42, n_init=10) # Added n_init
         df['cluster'] = kmeans.fit_predict(X)
         
-        # Get cluster centers
         centers = kmeans.cluster_centers_
         
-        # Prepare result
         result = {
             'schools': df.to_dict('records'),
             'centers': centers.tolist()
         }
-        
         return jsonify(result)
+    except FileNotFoundError:
+        return jsonify({'error': 'school_locations.csv not found.'}), 404
     except Exception as e:
+        app.logger.error(f"Error in /api/schools/clusters: {e}") # Log the error
         return jsonify({'error': str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(debug=True)
