@@ -1,20 +1,24 @@
 body {
     margin: 0;
     padding: 0;
-    display: flex; /* Use flexbox for the main layout */
+    display: flex;
+    /* Use flexbox for the main layout */
     height: 100vh;
     font-family: Arial, sans-serif;
     font-size: 14px;
 }
 
 #map {
-    flex-grow: 1; /* Map takes remaining space */
+    flex-grow: 1;
+    /* Map takes remaining space */
     height: 100%;
 }
 
 #sidebar {
-    width: 320px; /* Fixed width for sidebar */
-    flex-shrink: 0; /* Prevent sidebar from shrinking */
+    width: 320px;
+    /* Fixed width for sidebar */
+    flex-shrink: 0;
+    /* Prevent sidebar from shrinking */
     height: 100%;
     overflow-y: auto;
     padding: 20px;
@@ -29,11 +33,14 @@ body {
     border-bottom: 1px solid #eee;
     padding-bottom: 10px;
 }
-#sidebar h3, #sidebar h4 {
+
+#sidebar h3,
+#sidebar h4 {
     margin-top: 15px;
     margin-bottom: 10px;
     color: #555;
 }
+
 #sidebar hr {
     margin-top: 15px;
     margin-bottom: 15px;
@@ -47,7 +54,8 @@ body {
     width: 100%;
     padding: 10px 15px;
     margin-bottom: 8px;
-    background-color: #007bff; /* Bootstrap primary blue */
+    background-color: #007bff;
+    /* Bootstrap primary blue */
     color: white;
     border: none;
     border-radius: 4px;
@@ -57,19 +65,21 @@ body {
 }
 
 #controls button:hover {
-    background-color: #0056b3; /* Darker blue on hover */
+    background-color: #0056b3;
+    /* Darker blue on hover */
 }
 
 .info-container {
     background-color: #ffffff;
     border: 1px solid #e0e0e0;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     margin-bottom: 20px;
     padding: 15px;
     border-radius: 5px;
 }
 
-.info-container h3, .info-container h4 {
+.info-container h3,
+.info-container h4 {
     margin-top: 0;
     border-bottom: 1px solid #f0f0f0;
     padding-bottom: 8px;
@@ -80,29 +90,36 @@ body {
     line-height: 1.6;
     margin-bottom: 8px;
 }
+
 .info-container ul {
     list-style: none;
     padding-left: 0;
 }
+
 .info-container ul li a {
     text-decoration: none;
     color: #007bff;
 }
+
 .info-container ul li a:hover {
     text-decoration: underline;
 }
 
 
 .error {
-    background-color: #f8d7da; /* Bootstrap danger background */
-    border-left: 4px solid #dc3545; /* Bootstrap danger color */
-    color: #721c24; /* Bootstrap danger text color */
+    background-color: #f8d7da;
+    /* Bootstrap danger background */
+    border-left: 4px solid #dc3545;
+    /* Bootstrap danger color */
+    color: #721c24;
+    /* Bootstrap danger text color */
     padding: 10px;
 }
 
 /* Specific for weather task */
 #weather-details-sidebar img,
-#sidebar img { /* General image styling within sidebar */
+#sidebar img {
+    /* General image styling within sidebar */
     max-width: 100%;
     height: auto;
     border-radius: 4px;

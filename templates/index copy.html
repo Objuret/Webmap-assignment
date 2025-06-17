@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>GIS Web Application</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Leaflet.Draw CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+    <!-- MarkerCluster CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    <!-- Polyline Measure CSS -->
+    <link rel="stylesheet" href="https://rawgit.com/ppete2/Leaflet.PolylineMeasure/master/Leaflet.PolylineMeasure.css" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+
+    <!-- Inline styles from your original index.html - consider moving all to style.css -->
+    <style>
+        body { margin: 0; padding: 0; display: flex; height: 100vh; font-family: Arial, sans-serif; }
+        #sidebar {
+            width: 25%; /* Or a fixed width like 300px */
+            min-width: 280px;
+            height: 100vh;
+            float: right; /* Or use flexbox for main layout */
+            overflow-y: auto;
+            padding: 15px;
+            box-sizing: border-box;
+            background-color: #f8f9fa;
+            border-left: 1px solid #dee2e6;
+        }
+        #map {
+            /* width: 75%; */ /* Flex grow will handle this */
+            flex-grow: 1;
+            height: 100vh;
+            /* float: left; */ /* Not needed with flex */
+        }
+        #controls button { margin-bottom: 8px; width: 100%; }
+        .info-container {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+        }
+        /* Add other styles from your style.css or keep them separate */
+    </style>
+</head>
+<body>
+    <!-- Re-ordered for map on left, sidebar on right as per your CSS -->
+    <div id="map"></div>
+    <div id="sidebar">
+        <h2>GIS Web App</h2>
+        <div id="controls">
+            <h4>G Tasks:</h4>
+            <button onclick="showTask1()">Task 1: Draw Features</button>
+            <button onclick="showTask2()">Task 2: City POIs & Measure</button>
+            <button onclick="showTask3()">Task 3: Supermarkets & Buffer</button>
+            <button onclick="showTask4()">Task 4: Image Overlay</button>
+            <button onclick="showTask5()">Task 5: Fuel Stations Cluster</button>
+            <hr>
+            <h4>VG Tasks:</h4>
+            <button onclick="showTask6()">Task 6: Weather API</button>
+            <button onclick="showTask7()">Task 7: School Clusters</button>
+        </div>
+        <div id="info">
+            <p>Select a task from the buttons above.</p>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Turf.js -->
+    <script src='https://unpkg.com/@turf/turf@6/turf.min.js'></script>
+    <!-- Leaflet.Draw JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+    <!-- MarkerCluster JS -->
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <!-- Polyline Measure JS -->
+    <script src="https://rawgit.com/ppete2/Leaflet.PolylineMeasure/master/Leaflet.PolylineMeasure.js"></script>
+
+    <!-- Your JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
