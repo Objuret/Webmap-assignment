@@ -73,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let toolCtrl    = null;    // Current toolbar/control reference
     let drawCreated = null;    // Reference to current draw event handler
 
+    
     // Clean up tools and controls when switching tasks
     const clearTools = () => {
         if (toolCtrl?._dispose) toolCtrl._dispose();   // Custom dispose method if available
@@ -171,7 +172,16 @@ document.addEventListener('DOMContentLoaded', () => {
             // Create mini-map popup functionality
             const popupId = `mini-map-${popupCounter++}`;
             const size    = 200;
-            layer.bindPopup(`<div id="${popupId}" style="width:${size}px; height:${size}px;"></div>`);
+            layer.bindPopup(`
+                <div style="margin-bottom: 8px;">
+                    <strong>Type:</strong> ${info.Type || "Unknown"}<br>
+                    <strong>Coordinates:</strong> ${info.Coordinates}
+                    ${info.Area ? `<br><strong>Area:</strong> ${info.Area}` : ""}
+                    ${info.Length ? `<br><strong>Length:</strong> ${info.Length}` : ""}
+                    ${info.Radius ? `<br><strong>Radius:</strong> ${info.Radius}` : ""}
+                </div>
+                <div id="${popupId}" style="width:${size}px; height:${size}px;"></div>
+             `);
 
             // Initialize mini-map when popup opens
             layer.on('popupopen', () => {

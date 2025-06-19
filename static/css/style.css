@@ -48,3 +48,13 @@ body {
     border-top: 1px solid #ccc;
     padding: 8px;
 }
+.leaflet-interactive:hover {
+    stroke: #ff0000 !important;
+    stroke-width: 4 !important;
+    fill-opacity: 0.3 !important;
+}
+
+/* For markers */
+.leaflet-marker-icon:hover {
+    filter: hue-rotate(0deg) saturate(2) brightness(1.2);
+}
