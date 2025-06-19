@@ -1,49 +1,29 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Webmap Assignment</title>
-
-    <!-- Font Awesome CSS (Crucial for sidebar icons) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
-
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-
-    <!-- Leaflet Sidebar v2 CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-sidebar-v2@0.2.0/css/leaflet-sidebar.min.css"/>
-
-    <!-- Custom CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@latest/dist/leaflet.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@latest/dist/leaflet.draw.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.polylinemeasure@latest/Leaflet.PolylineMeasure.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@latest/dist/MarkerCluster.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@latest/dist/MarkerCluster.Default.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-sidebar-v2@latest/css/leaflet-sidebar.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-
-    <!-- Leaflet JavaScript -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
-
-    <!-- Leaflet Sidebar v2 JavaScript -->
-    <script src="https://cdn.jsdelivr.net/npm/leaflet-sidebar-v2@0.2.0/js/leaflet-sidebar.min.js" defer></script>
-
-    <!-- Your custom JavaScript -->
+    <script src="https://unpkg.com/leaflet@latest/dist/leaflet.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-sidebar-v2@latest/js/leaflet-sidebar.min.js" defer></script>
+    <script src="https://unpkg.com/leaflet-draw@latest/dist/leaflet.draw.js" defer></script>
+    <script src="https://unpkg.com/leaflet.polylinemeasure@latest/Leaflet.PolylineMeasure.js" defer></script>
+    <script src="https://unpkg.com/leaflet.markercluster@latest/dist/leaflet.markercluster.js" defer></script>
+    <script src="https://unpkg.com/turf@latest/turf.min.js" defer></script>
     <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
-</head>
-<body>
-
-    <!-- Map container -->
-    <div id="map"></div>
-
-    <!-- Leaflet Sidebar v2 HTML structure -->
-    <div id="sidebar" class="leaflet-sidebar collapsed">
-        <div class="leaflet-sidebar-tabs">
-            <!-- Buttons for tasks will go here -->
-        </div>
-        <div class="leaflet-sidebar-content">
-            <h2 class="leaflet-sidebar-header">
-                Webmap Tasks
-                <div class="leaflet-sidebar-close"></div> 
-            </h2>
-            <p>Select a task to display information or controls here.</p>
-        </div>
-    </div>
-
-</body>
+    </head>
+    <body>
+        <div id="map"></div>
+        <div id="sidebar" class="leaflet-sidebar collapsed"></div>
+    </body>
 </html>
+```
